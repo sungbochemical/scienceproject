@@ -1,1 +1,217 @@
-# scienceproject
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>일본어 플래시카드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .app {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      max-width: 420px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 12px;
+      text-align: center;
+    }
+    .card {
+      border-radius: 14px;
+      border: 1px solid #e0e0e0;
+      padding: 24px 18px;
+      margin-bottom: 16px;
+      text-align: center;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+      background: #fffdf7;
+    }
+    .card-front {
+      font-size: 30px;
+    }
+    .card-back {
+      font-size: 16px;
+      color: #555;
+      line-height: 1.6;
+    }
+    .status {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      flex: 1 1 30%;
+      padding: 8px 4px;
+      border-radius: 999px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      background: #ffb74d;
+      color: #212121;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+      background: #ffa726;
+    }
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+    .small {
+      font-size: 12px;
+      margin-top: 8px;
+      text-align: center;
+      color: #777;
+    }
+    @media (max-width: 480px) {
+      .app {
+        margin: 12px;
+        padding: 16px;
+      }
+      .card {
+        padding: 20px 14px;
+      }
+      .card-front {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>일본어 문화 · 관광 · 교통 플래시카드</h1>
+    <div class="status" id="status"></div>
+    <div class="card" id="card">
+      <div class="card-front" id="cardFront"></div>
+      <div class="card-back" id="cardBack" style="display:none;"></div>
+    </div>
+    <div class="buttons">
+      <button id="prevBtn">Prev</button>
+      <button id="flipBtn">Flip</button>
+      <button id="nextBtn">Next</button>
+      <button id="randomBtn">Random</button>
+    </div>
+    <div class="small">
+      카드를 탭하거나 Flip을 누르면 앞/뒤가 바뀝니다.
+    </div>
+  </div>
+
+  <script>
+    // 교과서 해당 쪽에 실제로 표시된 표현만 사용
+    const cards = [
+      // 연중 행사 · 축제
+      { jp: "たなばた", ko: "칠석 (7월 7일)" },
+      { jp: "たなばたまつり", ko: "다나바타마쓰리 – 도호쿠 지방 센다이에서 8월 6〜8일에 열리는 축제" },
+      { jp: "たんざく", ko: "단자쿠 – 소원을 적어 대나무에 매다는 긴 종이" },
+      { jp: "おぼん", ko: "오본 – 8월 13〜16일, 성묘를 하는 일본의 명절" },
+      { jp: "ぼんおどり", ko: "본오도리 – 오본 때 유카타를 입고 추는 춤" },
+      { jp: "しちごさん", ko: "시치고산 – 11월 15일, 아이의 성장을 기원하는 행사 (남: 3·5세, 여: 3·7세)" },
+      { jp: "せつぶん", ko: "세쓰분 – 2월 3일 무렵, ‘귀신은 밖으로, 복은 안으로’라고 외치며 콩을 뿌리는 날" },
+      { jp: "まめまき", ko: "마메마키 – 세쓰분에 하는 콩 뿌리기" },
+      { jp: "ひなまつり", ko: "히나마쓰리 – 3월 3일, 여자아이의 건강과 행복을 기원하며 히나 인형을 장식하는 날" },
+      { jp: "こどものひ", ko: "어린이날 – 5월 5일, 아이들의 성장을 기원하는 날" },
+      { jp: "こいのぼり", ko: "고이노보리 – 어린이날에 다는 잉어 모양 장식" },
+
+      // 관광 명소 · 계절
+      { jp: "ハウステンボス", ko: "하우스텐보스 – 네덜란드의 자연과 건축물을 주제로 한 나가사키 지역의 놀이공원" },
+      { jp: "ディズニーランド", ko: "디즈니랜드 – 지바 지역에 있는 테마파크" },
+      { jp: "ユニバーサル・スタジオ・ジャパン", ko: "유니버설 스튜디오 재팬 – 오사카의 테마파크" },
+      { jp: "うえのこうえん", ko: "우에노 공원 – 박물관, 동물원 등이 있는 공원" },
+      { jp: "おきなわのうみ", ko: "오키나와의 바닷가 – 여름 관광지" },
+      { jp: "さっぽろのゆきまつり", ko: "삿포로의 눈축제 – 눈과 얼음 조각을 전시하는 겨울 축제" },
+      { jp: "きよみずでら", ko: "기요미즈데라 – 8세기 말, 절벽에 세운 절" },
+      { jp: "きんかくじ", ko: "킨카쿠지(金かくじ) – 건물 전체를 금박으로 장식한 절" },
+      { jp: "せんそうじ", ko: "센소지 – 도쿄의 대표적인 사찰" },
+      { jp: "なごやじょう", ko: "나고야성 – 성 일부를 금으로 장식, 아이치현 나고야시에 있음" },
+      { jp: "ひめじじょう", ko: "히메지성 – 가장 아름다운 성으로 손꼽히며 세계 문화유산으로 지정" },
+      { jp: "おおさかじょう", ko: "오사카성 – 간사이 지방에서 규모가 큰 성" },
+
+      // 교통 문화
+      { jp: "タクシー", ko: "택시 – 일본 택시는 뒷문이 자동문인 경우가 많음" },
+      { jp: "ちかてつ", ko: "지하철 – 일본의 철도 교통 수단" },
+      { jp: "でんしゃ", ko: "전철 – 일반 철도 전철" },
+      { jp: "しんかんせん", ko: "신칸센 – 일본의 고속 철도" },
+      { jp: "じてんしゃ", ko: "자전거 – 통학, 출퇴근에 많이 이용하는 교통수단" }
+    ];
+
+    let currentIndex = 0;
+    let isFront = true;
+
+    const statusEl = document.getElementById("status");
+    const cardEl = document.getElementById("card");
+    const frontEl = document.getElementById("cardFront");
+    const backEl = document.getElementById("cardBack");
+
+    function renderCard() {
+      const card = cards[currentIndex];
+      statusEl.textContent = `${currentIndex + 1} / ${cards.length}`;
+      if (isFront) {
+        frontEl.textContent = card.jp;
+        frontEl.style.display = "block";
+        backEl.style.display = "none";
+      } else {
+        backEl.textContent = card.ko;
+        frontEl.style.display = "none";
+        backEl.style.display = "block";
+      }
+    }
+
+    function flipCard() {
+      isFront = !isFront;
+      renderCard();
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+      isFront = true;
+      renderCard();
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % cards.length;
+      isFront = true;
+      renderCard();
+    });
+
+    document.getElementById("randomBtn").addEventListener("click", () => {
+      let next = Math.floor(Math.random() * cards.length);
+      if (next === currentIndex && cards.length > 1) {
+        next = (next + 1) % cards.length;
+      }
+      currentIndex = next;
+      isFront = true;
+      renderCard();
+    });
+
+    document.getElementById("flipBtn").addEventListener("click", flipCard);
+    cardEl.addEventListener("click", flipCard);
+
+    // 초기 표시
+    renderCard();
+  </script>
+</body>
+</html>
